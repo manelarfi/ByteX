@@ -488,7 +488,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948fc0907b1dde54890996d0a94a65a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settingsSO: {fileID: 11400000, guid: d26595af6ca3427428a6494c19d47579, type: 2}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
   nbChances: {fileID: 673723920}
 --- !u!1 &272325719
 GameObject:
@@ -699,6 +709,7 @@ GameObject:
   - component: {fileID: 309732589}
   - component: {fileID: 309732591}
   - component: {fileID: 309732590}
+  - component: {fileID: 309732592}
   m_Layer: 0
   m_Name: COMPortSettings
   m_TagString: Untagged
@@ -763,6 +774,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 309732588}
   m_CullTransparentMesh: 0
+--- !u!114 &309732592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 309732588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7936b05d4a4b6564b9d6a8d3090085c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
+  dropdown: {fileID: 1349870669}
+  inputField: {fileID: 1380574449}
 --- !u!1 &320011437
 GameObject:
   m_ObjectHideFlags: 0
@@ -1414,7 +1440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: {fileID: 2029657624}
-  settings: {fileID: 11400000, guid: d26595af6ca3427428a6494c19d47579, type: 2}
+  config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
 --- !u!1 &475817837
 GameObject:
   m_ObjectHideFlags: 0
@@ -2194,8 +2220,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2128455757}
-        m_MethodName: TryPort
+      - m_Target: {fileID: 309732592}
+        m_MethodName: TrySendSET
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3657,7 +3683,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   difficultyDropdown: {fileID: 1215590796}
-  settings: {fileID: 11400000, guid: d26595af6ca3427428a6494c19d47579, type: 2}
+  config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
 --- !u!1 &945825535
 GameObject:
   m_ObjectHideFlags: 0
@@ -5558,6 +5584,65 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1489099571
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1489099574}
+  - component: {fileID: 1489099573}
+  - component: {fileID: 1489099572}
+  m_Layer: 0
+  m_Name: DeviceConfig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1489099572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489099571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baba587ea36af584ba3c3835e11b383e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _serialPortManager: {fileID: 0}
+  config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
+--- !u!114 &1489099573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489099571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ea437045d306a459dab02531f9f8e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: d2e6456dc7c03bd44a4e99f0b6acaf85, type: 2}
+--- !u!4 &1489099574
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489099571}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 430.71, y: 215.6718, z: -3.6029587}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1491816929
 GameObject:
   m_ObjectHideFlags: 0
@@ -6542,73 +6627,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1676644782}
   m_CullTransparentMesh: 0
---- !u!1 &1734792256
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1734792258}
-  - component: {fileID: 1734792257}
-  - component: {fileID: 1734792259}
-  m_Layer: 0
-  m_Name: Configuration
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1734792257
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734792256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 886016f53bf0f6341b9e0b2edc79c5d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  settingSO: {fileID: 11400000, guid: d26595af6ca3427428a6494c19d47579, type: 2}
-  autoConnectionData: {fileID: 11400000, guid: 474bcca2f2439a542b7b6352593910fa, type: 2}
-  portName: 
-  baudRate: 9600
-  connectionTimeout: 1000
-  maxRetries: 3
-  isConnected: 0
---- !u!4 &1734792258
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734792256}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1734792259
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734792256}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bee5eb2942b00df46bb6f610604a71c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  portName: COM8
-  baudRate: 9600
-  connectionTimeout: 5
-  maxRetries: 3
 --- !u!1 &1766074254
 GameObject:
   m_ObjectHideFlags: 0
@@ -8053,7 +8071,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2128455755}
   - component: {fileID: 2128455756}
-  - component: {fileID: 2128455757}
   m_Layer: 0
   m_Name: PortManager
   m_TagString: Untagged
@@ -8106,20 +8123,6 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
---- !u!114 &2128455757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2128455754}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df922a4944e67f44194800fdaf9aca55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoConnectionData: {fileID: 11400000, guid: 474bcca2f2439a542b7b6352593910fa, type: 2}
-  dropdown: {fileID: 1349870669}
 --- !u!1001 &7494473179608978853
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8170,7 +8173,7 @@ PrefabInstance:
     - target: {fileID: 7494473180155867069, guid: 99762c36455118c4fa6ec2ce8b74f3f9,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7494473180155867069, guid: 99762c36455118c4fa6ec2ce8b74f3f9,
         type: 3}

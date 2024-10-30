@@ -6,7 +6,7 @@ using TMPro;
 public class ResetScore : MonoBehaviour
 {
     [SerializeField] private TMP_Text score; // UI text to display the score
-    [SerializeField] private SettingsSO settings; // Reference to SettingsSO to track the score
+    [SerializeField] private ConfigSO config; // Reference to SettingsSO to track the score
 
     void Start()
     {
@@ -15,7 +15,7 @@ public class ResetScore : MonoBehaviour
             Debug.LogError("Score text is not assigned in the inspector.");
         }
 
-        if (settings == null)
+        if (config == null)
         {
             Debug.LogError("SettingsSO is not assigned in the inspector.");
         }
@@ -26,9 +26,9 @@ public class ResetScore : MonoBehaviour
     // Method to reset the score
     public void ResetGameScore()
     {
-        if (settings != null) 
+        if (config != null) 
         {
-            settings.bestScore = 0; // Reset score in settings
+            config.bestScore = 0; // Reset score in settings
             UpdateScoreDisplay(); // Update the score displayed in the UI
         }
         else
@@ -40,9 +40,9 @@ public class ResetScore : MonoBehaviour
     // Method to update the UI text with the current score
     private void UpdateScoreDisplay()
     {
-        if (score != null && settings != null) 
+        if (score != null && config != null) 
         {
-            score.text = settings.bestScore.ToString(); // Display the current score
+            score.text = config.bestScore.ToString(); // Display the current score
         }
         else
         {

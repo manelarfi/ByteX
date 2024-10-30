@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class Chances : MonoBehaviour
+public class ChancesManager : MonoBehaviour
 {
-    [SerializeField] private SettingsSO settingsSO; // Reference to settings
+    [SerializeField] private ConfigSO config; // Reference to settings
     [SerializeField] private TMP_Text nbChances; // UI text to display the chances
 
     private void Start()
@@ -15,27 +15,27 @@ public class Chances : MonoBehaviour
 
     public void AddLives()
     {
-        if (settingsSO != null) 
+        if (config != null) 
         {
-            settingsSO.chances += 1; // Increase chances
+            config.chances += 1; // Increase chances
             UpdateLivesDisplay(); // Update the UI text
         }
     }
 
     public void RemoveLives()
     {
-        if (settingsSO != null && settingsSO.chances > 1) 
+        if (config != null && config.chances > 1) 
         {
-            settingsSO.chances -= 1; // Decrease chances
+            config.chances -= 1; // Decrease chances
             UpdateLivesDisplay(); // Update the UI text
         }
     }
 
     private void UpdateLivesDisplay()
     {
-        if (nbChances != null && settingsSO != null) 
+        if (nbChances != null && config != null) 
         {
-            nbChances.text = settingsSO.chances.ToString(); // Display the current number of chances
+            nbChances.text = config.chances.ToString(); // Display the current number of chances
         }
     }
 }

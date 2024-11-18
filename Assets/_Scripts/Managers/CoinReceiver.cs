@@ -1,20 +1,37 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CoinReceiver : MonoBehaviour
 {
-    // private void Start() {
-    //     PCDeviceConfiguration.Instance.OnReceivedData += processMessage;
-    // }
+    private bool isSceneLoading = false;
 
-    // private void processMessage (string message)
-    // {
-    //     if (message.Contains("CMD003")) {
-    //         Debug.Log("coin has been logged");
-    //         SceneManager.LoadScene(4);
-    //     }
-    // }
+    private void Start() {
+        DataProcessor.Instance.ListenToCOMPort();
+        DataProcessor.Instance.delegateInfo += checkCommand;
+    }
+
+    private void checkCommand(string data)
+    {
+        Debug.Log(data + "hhhh");
+        if (data != null && data.Contains("CMD03"))
+        {
+            Debug.Log("received CMD03");
+            SceneManager.LoadScene("INGAME");
+        }
+    }
+
+    private void Update() {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            SceneManager.LoadScene("MAIN");
+        }
+    }
+
+    private void OnDestroy() {
+        // Unsubscribe from the event to prevent memory leaks
+        DataProcessor.Instance.delegateInfo -= checkCommand;
+    }
 }

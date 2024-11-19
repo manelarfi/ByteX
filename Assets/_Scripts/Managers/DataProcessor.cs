@@ -9,60 +9,49 @@ public class DataProcessor : PersistentSingleton<DataProcessor>
     public ConfigSO config;
     public GameObject ConnectionPanel;
 
-    private FadeInFadeOutAnim _FadeInFadeOutAnim;
-    private ConnectionPanelController _connectionPanelController;    
-    public bool isConnected ;
+    private FadeInFadeOutAnim _fadeInFadeOutAnim;
+    private ConnectionPanelController _connectionPanelController;
+    public bool isConnected;
     public bool canStart;
-    
+
     private string latestReceivedData;
-    private Coroutine readPortCoroutine; // To manage the reading coroutine
+    private Coroutine readPortCoroutine;
 
     public event Action<string> delegateInfo;
 
-    private void Start() 
+    private void Start()
     {
         config.Load();
         canStart = false;
         isConnected = false;
+
         _serialPortManager = GetComponent<SerialPortManager>();
         _connectionPanelController = ConnectionPanel.GetComponent<ConnectionPanelController>();
-        _FadeInFadeOutAnim = ConnectionPanel.GetComponent<FadeInFadeOutAnim>();
+        _fadeInFadeOutAnim = ConnectionPanel.GetComponent<FadeInFadeOutAnim>();
+
         _serialPortManager.OnOpenedSerialPort += InitialiseApp;
+        _serialPortManager.OnCloseSerialPort += HandlePortClosed;
+
         _serialPortManager.OpenSerialPort();
-
-        StartCoroutine(checkConnection());
     }
-
 
     private void OnDisable()
     {
-        // Stop listening and clean up
         StopReadingPort();
         _serialPortManager.OnOpenedSerialPort -= InitialiseApp;
+        _serialPortManager.OnCloseSerialPort -= HandlePortClosed;
     }
-
-    private IEnumerator checkConnection()
-{
-    while (SceneManager.GetActiveScene().name == "MAIN" && !isConnected)
-    {
-        Debug.Log("Checking connection on returning to main scene...");
-        InitialiseApp();
-
-        // Wait for a few seconds before checking again
-        yield return new WaitForSeconds(5f);
-    }
-}
-
 
     public void InitialiseApp()
     {
+        Debug.Log("Initializing application...");
         string data = "CMD01";
         string expectedAnswer = "ACK01";
-        
+
         if (isConnected)
         {
             RestartCommunication();
-        } 
+        }
         else if (config.didConnect)
         {
             ConnectionPanel.SetActive(true);
@@ -78,28 +67,24 @@ public class DataProcessor : PersistentSingleton<DataProcessor>
                 {
                     Debug.LogWarning("Expected response not received within the timeout.");
                     _connectionPanelController.SetFailedActive();
-                    _FadeInFadeOutAnim.FadeOutAndDisable();
+                    _fadeInFadeOutAnim.FadeOutAndDisable();
                 }
-                
             }));
         }
     }
-
 
     public IEnumerator SendSETCommand()
     {
         string data = $"SET0{config.chances}";
         string expectedAnswer = "ACK02";
 
-        Debug.Log(data);
-        yield return _serialPortManager.SendMessageAndWaitForAnswer(data, expectedAnswer, responseReceived2 =>
+        yield return _serialPortManager.SendMessageAndWaitForAnswer(data, expectedAnswer, responseReceived =>
         {
-            if (responseReceived2)
+            if (responseReceived)
             {
                 isConnected = true;
                 Debug.Log("Initialization successful. Starting game.");
                 _connectionPanelController.SetConnectedActive();
-                
             }
             else
             {
@@ -107,33 +92,32 @@ public class DataProcessor : PersistentSingleton<DataProcessor>
                 _connectionPanelController.SetFailedActive();
             }
         });
-        _FadeInFadeOutAnim.FadeOutAndDisable();
+
+        _fadeInFadeOutAnim.FadeOutAndDisable();
     }
-    
+
     public IEnumerator SendStartCommand()
     {
         string data = "CMD02";
         string expectedAnswer = "ACK03";
 
-        Debug.Log("command sent");
-        yield return _serialPortManager.SendMessageAndWaitForAnswer(data, expectedAnswer, responseReceived2 =>
+        yield return _serialPortManager.SendMessageAndWaitForAnswer(data, expectedAnswer, responseReceived =>
         {
-            if (responseReceived2)
+            if (responseReceived)
             {
                 canStart = true;
                 SceneManager.LoadScene("START");
             }
             else
             {
-                Debug.Log("did not receive");
+                Debug.Log("Start command acknowledgment not received.");
             }
-        }); 
-        
+        });
     }
 
     public void ListenToCOMPort()
     {
-        StopReadingPort(); // Ensure previous reading coroutine is stopped
+        StopReadingPort();
         readPortCoroutine = StartCoroutine(_serialPortManager.CoroutineReadPort(UpdateReceivedData));
     }
 
@@ -142,8 +126,8 @@ public class DataProcessor : PersistentSingleton<DataProcessor>
         if (readPortCoroutine != null)
         {
             StopCoroutine(readPortCoroutine);
-            readPortCoroutine = null; // Clear the reference
-            Debug.Log("stopped reading from port");
+            readPortCoroutine = null;
+            Debug.Log("Stopped reading from port.");
         }
     }
 
@@ -152,22 +136,26 @@ public class DataProcessor : PersistentSingleton<DataProcessor>
         latestReceivedData = data;
         delegateInfo?.Invoke(data);
         Debug.Log("Updated latest received data: " + latestReceivedData);
+    }
 
+    public void RestartCommunication()
+    {
+        Debug.Log("Restarting communication...");
+        StopReadingPort();
+        StartCoroutine(_serialPortManager.RestartPortWithDelay());
+    }
+
+    private void HandlePortClosed()
+    {
+        Debug.Log("Serial port was closed. Resetting connection state.");
+        isConnected = false;
     }
 
     private void OnApplicationQuit()
     {
         config.Save();
         Debug.Log("Application quitting. Closing serial port...");
-        StopReadingPort(); // Stop reading before closing
+        StopReadingPort();
         _serialPortManager.CloseSerialPort();
-    }
-
-    private void RestartCommunication()
-    {
-        Debug.Log("Restarting communication...");
-        StopReadingPort(); // Ensure reading stops
-        _serialPortManager.CloseSerialPort();
-        _serialPortManager.OpenSerialPort();
     }
 }

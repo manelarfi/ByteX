@@ -3,7 +3,6 @@ using System.Collections;
 using System.IO.Ports;
 using System;
 using System.Collections.Generic;
-
 using System.IO;
 
 public class SerialPortManager : PersistentSingleton<SerialPortManager>
@@ -12,23 +11,27 @@ public class SerialPortManager : PersistentSingleton<SerialPortManager>
     public SerialPort SerialPort;
     private string portStatus;
 
-    public event Action OnOpenedSerialPort;    
+    private bool isPortOperationInProgress = false;
+    private bool isListening = true;
+
+    public event Action OnOpenedSerialPort;
     public event Action OnCloseSerialPort;
     public event Action<string> OnReceivedData;
 
-    
     public void OpenSerialPort()
     {
+        if (isPortOperationInProgress) return;
+
+        isPortOperationInProgress = true;
+
         try
         {
-            // Check if the port is already open
             if (SerialPort != null && SerialPort.IsOpen)
             {
                 Debug.LogWarning("Attempted to open the serial port, but it is already open.");
-                return; // Early exit if the port is already open
+                return;
             }
 
-            // Initialize the serial port with config parameters
             SerialPort = new SerialPort(config.portName, config.baudRate, config.parity, config.dataBits, config.stopBits)
             {
                 ReadTimeout = config.readTimeout,
@@ -52,11 +55,14 @@ public class SerialPortManager : PersistentSingleton<SerialPortManager>
         {
             Debug.LogError($"Error opening port: {ex.Message}\n{ex.StackTrace}");
         }
+        finally
+        {
+            isPortOperationInProgress = false;
+        }
     }
 
     public List<string> ListPorts()
     {
-        // Get available serial ports
         string[] ports = SerialPort.GetPortNames();
         List<string> portOptions = new List<string> { "none" };
         portOptions.AddRange(ports);
@@ -72,49 +78,64 @@ public class SerialPortManager : PersistentSingleton<SerialPortManager>
     {
         if (SerialPort != null && SerialPort.IsOpen)
         {
-            SerialPort.Close();
-            portStatus = "Port is closed";
-            Debug.Log("Port closed");
-            OnCloseSerialPort?.Invoke();
+            try
+            {
+                SerialPort.Close();
+                portStatus = "Port is closed";
+                Debug.Log("Port closed");
+                OnCloseSerialPort?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error closing port: {ex.Message}");
+            }
+            finally
+            {
+                SerialPort = null;
+            }
         }
-        yield return null; // Yield to ensure this method can be used in a coroutine
+        yield return null;
     }
 
     public IEnumerator SendMessageAndWaitForAnswer(string data, string expectedResponse, Action<bool> callback, float timeoutSeconds = 30f)
     {
-        if (SerialPort == null || !SerialPort.IsOpen)
+        if (SerialPort == null || !SerialPort.IsOpen || !isListening)
         {
-            Debug.Log("Serial port is not open.");
+            Debug.LogWarning("Serial port is not available for sending messages.");
             callback?.Invoke(false);
             yield break;
         }
 
-        string receivedData = string.Empty;
-        float startTime = 0f;
+        float elapsed = 0f;
 
-        while (startTime <= timeoutSeconds)
+        while (elapsed < timeoutSeconds)
         {
             SendSerialData(data);
             yield return new WaitForSeconds(1f);
-            startTime += 1f;
+            elapsed += 1f;
 
             try
             {
-                receivedData = ReceiveSerialData();
+                string receivedData = ReceiveSerialData();
                 if (receivedData.Contains(expectedResponse))
                 {
-                    Debug.Log("Expected response received.");
                     callback?.Invoke(true);
                     yield break;
                 }
             }
             catch (TimeoutException)
             {
-                // Handle timeout silently or log if needed
+                Debug.LogWarning("Timeout while waiting for response.");
+            }
+
+            if (!isListening)
+            {
+                callback?.Invoke(false);
+                yield break;
             }
         }
 
-        Debug.Log($"Expected response '{expectedResponse}' not received");
+        Debug.LogWarning($"Expected response '{expectedResponse}' not received.");
         callback?.Invoke(false);
     }
 
@@ -122,12 +143,19 @@ public class SerialPortManager : PersistentSingleton<SerialPortManager>
     {
         if (SerialPort != null && SerialPort.IsOpen)
         {
-            SerialPort.WriteLine(data);
-            Debug.Log("Sent data: " + data);
+            try
+            {
+                SerialPort.WriteLine(data);
+                Debug.Log("Sent data: " + data);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error sending data: {ex.Message}");
+            }
         }
         else
         {
-            Debug.Log("Serial port is not open.");
+            Debug.LogWarning("Serial port is not open. Cannot send data.");
         }
     }
 
@@ -135,27 +163,56 @@ public class SerialPortManager : PersistentSingleton<SerialPortManager>
     {
         if (SerialPort != null && SerialPort.IsOpen)
         {
-            string receivedData = SerialPort.ReadExisting();
-            Debug.Log("Received data: " + receivedData);
-            return receivedData;
+            try
+            {
+                string receivedData = SerialPort.ReadExisting();
+                Debug.Log("Received data: " + receivedData);
+                return receivedData;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"receiving data: {ex.Message}");
+            }
         }
         else
         {
-            Debug.Log("Serial port is not open.");
-            return string.Empty;
+            Debug.LogWarning("Serial port is not open.");
         }
+        return string.Empty;
     }
 
     public IEnumerator CoroutineReadPort(Action<string> onDataReceived)
     {
         while (SerialPort != null && SerialPort.IsOpen)
         {
-            string data = ReceiveSerialData();
-            if (!string.IsNullOrEmpty(data))
+            try
             {
-                onDataReceived?.Invoke(data);
+                string data = ReceiveSerialData();
+                if (!string.IsNullOrEmpty(data))
+                {
+                    onDataReceived?.Invoke(data);
+                }
             }
-            yield return new WaitForSeconds(3f); // Continue listening with a slight delay
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error while reading from port: {ex.Message}");
+            }
+            yield return new WaitForSeconds(3f);
         }
+    }
+
+    public void StopAllSerialPortCoroutines()
+    {
+        StopAllCoroutines();
+        isListening = false;
+        Debug.Log("Stopped all serial port coroutines.");
+    }
+
+    public IEnumerator RestartPortWithDelay()
+    {
+        StopAllSerialPortCoroutines();
+        yield return ClosePortSafely();
+        yield return new WaitForSeconds(0.1f);
+        OpenSerialPort();
     }
 }

@@ -9,7 +9,7 @@ public class MenuNavigator : MonoBehaviour
     public bool canNavigate = true;        // Flag to allow or restrict navigation input
 
     private int selectedIndex = 0;         // Currently selected button index
-    private float inputDelay = 0.2f;       // Delay for input to prevent quick toggling
+    private float inputDelay = 1f;       // Delay for input to prevent quick toggling
     private float nextInputTime = 0f;      // Timer for input delay
 
     private void Start()
@@ -31,12 +31,12 @@ public class MenuNavigator : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         // Move up
-        if (vertical > 0.5f || Input.GetKeyDown(KeyCode.UpArrow))
+        if (vertical > 0.9f || Input.GetKeyDown(KeyCode.UpArrow))
         {
             ChangeSelection(-1);             // Move selection up
         }
         // Move down
-        else if (vertical < -0.5f || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (vertical < -0.9f || Input.GetKeyDown(KeyCode.DownArrow))
         {
             ChangeSelection(1);              // Move selection down
         }
@@ -51,6 +51,8 @@ public class MenuNavigator : MonoBehaviour
         // Submit action on selected button
         if (Input.GetButtonDown("Submit"))
         {
+            audioManagerr.Instance.PlaySFX(0);
+            Debug.Log("submit");
             menuButtons[selectedIndex].onClick.Invoke(); // Trigger button click event
         }
     }

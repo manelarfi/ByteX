@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7315fcc4809ab74899fef9e85524f61, type: 3}
   m_Name: Config
   m_EditorClassIdentifier: 
-  portName: 
+  portName: /dev/ttyUSB0
   Index: 2
   baudRate: 9600
   parity: 0
@@ -20,7 +20,7 @@ MonoBehaviour:
   dataBits: 8
   dtrEnable: 0
   rtsEnable: 0
-  didConnect: 0
+  didConnect: 1
   index: 0
   readTimeout: 100
   writeTimeout: 100

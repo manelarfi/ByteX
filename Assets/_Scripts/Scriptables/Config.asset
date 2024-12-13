@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Config
   m_EditorClassIdentifier: 
   portName: /dev/ttyUSB0
-  Index: 2
+  Index: 33
   baudRate: 9600
   parity: 0
   stopBits: 1
@@ -24,6 +24,6 @@ MonoBehaviour:
   index: 0
   readTimeout: 100
   writeTimeout: 100
-  level: 2
+  level: 4
   chances: 3
-  bestScore: 0
+  bestScore: 944

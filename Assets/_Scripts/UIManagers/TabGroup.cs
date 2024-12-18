@@ -45,7 +45,7 @@ public class TabGroup : MonoBehaviour
         }
     }
 
-    private void NavigateRight()
+    public void NavigateRight()
     {
         // Move to the next tab, looping back to the start if necessary
         currentTabIndex = (currentTabIndex + 1) % tabButtons.Length;
@@ -53,7 +53,7 @@ public class TabGroup : MonoBehaviour
         nextInputTime = Time.time + inputDelay;
     }
 
-    private void NavigateLeft()
+    public void NavigateLeft()
     {
         // Move to the previous tab, looping back to the end if necessary
         currentTabIndex = (currentTabIndex - 1 + tabButtons.Length) % tabButtons.Length;

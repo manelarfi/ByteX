@@ -84,7 +84,6 @@ public class DataProcessor : StaticInstance<DataProcessor>
                 if (responseReceived)
                 {
                     Debug.Log("Expected response received. Continuing with application initialization.");
-                    _connectionPanelController.SetConnexionActive();
                     StartCoroutine(SendSETCommand());
                 }
                 else
@@ -121,6 +120,8 @@ public class DataProcessor : StaticInstance<DataProcessor>
             else
             {
                 Debug.LogWarning("Failed to set level. Retrying initialization.");
+                _connectionPanelController.SetFailedActive();
+                _fadeInFadeOutAnim.FadeOutAndDisable();
             }
         });
     }

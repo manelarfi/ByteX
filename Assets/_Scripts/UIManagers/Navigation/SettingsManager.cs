@@ -44,6 +44,11 @@ public class SettingsManager : Singleton<SettingsManager>
 
     private bool ClearGameObjects()
     {
+        if (EventSystem.current.currentSelectedGameObject == null)
+    {
+        Debug.Log("No GameObject currently selected.");
+        return false;
+    }
         foreach (var button in selectedGameObjects)
         {
             if (EventSystem.current.currentSelectedGameObject == button)

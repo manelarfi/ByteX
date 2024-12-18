@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class CoinReceiver : MonoBehaviour
 {
     private bool isSceneLoading = false;
+    public ConfigSO configSO;
 
     private void Start() {
         DataProcessor.Instance.ListenToCOMPort();
@@ -15,9 +16,9 @@ public class CoinReceiver : MonoBehaviour
 
     private void checkCommand(string data)
     {
-        Debug.Log(data + "hhhh");
         if (data != null && data.Contains("CMD03"))
         {
+            configSO.coinCounter ++;
             Debug.Log("received CMD03");
             SceneManager.LoadScene("INGAME");
         }

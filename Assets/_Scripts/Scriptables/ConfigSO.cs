@@ -24,6 +24,9 @@ public class ConfigSO : ScriptableObject
     public int chances;
     public int bestScore;
 
+    [Header("Extra Info")]
+    public int coinCounter;
+
     private string filePath;
 
     private void OnEnable()

@@ -8,9 +8,10 @@ public class HorizontalMenuNavigation : MonoBehaviour
 {
     public Button[] menuButtons;           // Array of menu buttons
     public bool canNavigate = true;        // Flag to allow or restrict navigation input
+    public GameObject selectedButton;      // Reference to the dropdown's selected button
 
     private int selectedIndex = 0;         // Currently selected button index
-    private float inputDelay = 1f;       // Delay for input to prevent quick toggling
+    private float inputDelay = 1f;         // Delay for input to prevent quick toggling
     private float nextInputTime = 0f;      // Timer for input delay
 
     private void Start()
@@ -29,38 +30,31 @@ public class HorizontalMenuNavigation : MonoBehaviour
 
     private void HandleInput()
     {
-        float vertical = Input.GetAxis("Horizontal");
+        float horizontal = Input.GetAxis("Horizontal");
 
-        // Move up
-        if (vertical > 0.5f || Input.GetKeyDown(KeyCode.UpArrow))
+        // Navigate left
+        if (horizontal > 0.5f || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            ChangeSelection(-1);             // Move selection up
+            ChangeSelection(1);             // Move selection right
         }
-        // Move down
-        else if (vertical < -0.5f || Input.GetKeyDown(KeyCode.DownArrow))
+        // Navigate right
+        else if (horizontal < -0.5f || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            ChangeSelection(1);              // Move selection down
-        }
-
-        // Horizontal input detected, keep the current selection highlighted
-        float horizontal = Input.GetAxis("Vertical");
-        if (horizontal != 0)
-        {
-            SetSelectedButton(); // Ensure the current button remains highlighted
+            ChangeSelection(-1);            // Move selection left
         }
 
-        // Submit action on selected button
+        // Submit action on the selected button
         if (Input.GetButtonDown("Submit"))
         {
-            // audioManagerr.Instance.PlaySFX(0);
-            //Debug.Log(menuButtons[selectedIndex].name + "clicked");
-            //menuButtons[selectedIndex].onClick.Invoke(); // Trigger button click event
-            gameObject.SetActive(false);
+            menuButtons[selectedIndex].onClick.Invoke(); // Trigger button click event
+            ReturnToDropdown();                          // Return selection to dropdown's button
         }
 
+        // Cancel action
         if (Input.GetButtonDown("Cancel"))
         {
-            Debug.Log("cancel");
+            Debug.Log("Cancel action triggered.");
+            ReturnToDropdown();                          // Return selection to dropdown's button
         }
     }
 
@@ -68,7 +62,7 @@ public class HorizontalMenuNavigation : MonoBehaviour
     {
         // Adjust selectedIndex in a circular manner
         selectedIndex = (selectedIndex + direction + menuButtons.Length) % menuButtons.Length;
-        
+
         nextInputTime = Time.time + inputDelay; // Set the next input time
         SetSelectedButton();                    // Update the currently selected button
     }
@@ -76,7 +70,16 @@ public class HorizontalMenuNavigation : MonoBehaviour
     private void SetSelectedButton()
     {
         EventSystem.current.SetSelectedGameObject(menuButtons[selectedIndex].gameObject); // Highlight the button in the Event System
-        Debug.Log(EventSystem.current.currentSelectedGameObject.name);
+        Debug.Log("Current Selected Button: " + EventSystem.current.currentSelectedGameObject.name);
+    }
+
+    private void ReturnToDropdown()
+    {
+        if (selectedButton != null)
+        {
+            EventSystem.current.SetSelectedGameObject(selectedButton); // Highlight the dropdown's selected button
+            Debug.Log("Returned to Dropdown Selected Button: " + selectedButton.name);
+        }
     }
 
     // Call this method to disable navigation when dropdown opens

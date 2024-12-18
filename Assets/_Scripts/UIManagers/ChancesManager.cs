@@ -28,14 +28,11 @@ public class ChancesManager : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time >= nextInputTime) // Check if enough time has passed
-        {
             // Only change if the selected object is the desired button
-            if (EventSystem.current.currentSelectedGameObject == selectedButton)
+            if (EventSystem.current.currentSelectedGameObject == selectedButton && Time.time >= nextInputTime)
             {
                 HandleInput();
             }
-        }
     }
 
     private void HandleInput()

@@ -84,7 +84,7 @@ public class DropDownCOMPort : MonoBehaviour
     public void CloseDropdown()
     {
         isDropdownOpen = false;
-        //menuNavigator.canNavigate = true; // Re-enable menu navigation
+        menuNavigator.canNavigate = true; // Re-enable menu navigation
         
         // Reset focus to the button that triggered the dropdown
         EventSystem.current.SetSelectedGameObject(selectedButton);

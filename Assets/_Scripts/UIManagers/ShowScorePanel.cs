@@ -15,7 +15,7 @@ public class ShowScorePanel : MonoBehaviour
     private void OnEnable()
     {
         // Start the score animation coroutine each time the panel is enabled
-        StartCoroutine(SetScore(InGameManager.Instance.currentScore));
+        //StartCoroutine(SetScore(InGameManager.Instance.currentScore));
     }
 
     private IEnumerator SetScore(int targetScore)

@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class InGameManager : Singleton<InGameManager>
 {
@@ -10,12 +11,12 @@ public class InGameManager : Singleton<InGameManager>
     public ConfigSO configSO;
     public ScoreBoard scoreBoard;
     public LivesManager chancesManager;
-    public GameObject ScorePanel;
+    public float sensivity = 1.5f;
 
     private void Start()
     {
-        // Check for any missing references to prevent null errors
-        if (DataProcessor.Instance == null || configSO == null || chancesManager == null || scoreBoard == null || ScorePanel == null)
+        // Validate critical references
+        if (!AreReferencesValid())
         {
             Debug.LogError("One or more required references are missing in InGameManager.");
             return;
@@ -24,30 +25,33 @@ public class InGameManager : Singleton<InGameManager>
         // Subscribe to the data reception event
         DataProcessor.Instance.delegateInfo += Round;
 
-        // Initialize lives and best score from the config
+        // Initialize lives and scores
+        chancesManager.InitializeScoreboard(configSO.chances);
         chancesManager.lives = configSO.chances;
         scoreBoard.bestScore = configSO.bestScore;
     }
 
+    private bool AreReferencesValid()
+    {
+        return DataProcessor.Instance != null &&
+               configSO != null &&
+               chancesManager != null &&
+               scoreBoard != null ;
+    }
+
     public void Round(string data)
     {
-        Debug.Log("Received Data");
+        Debug.Log("Received data for processing.");
 
-        // Convert the received data into a raw score
+        // Convert received data into raw score
         rawScore = ConvertScrScore(data);
 
-        if (rawScore >= 0) // Check for a valid raw score
+        if (rawScore >= 0)
         {
+            // Apply difficulty scaling to calculate the current score
             currentScore = InverseLogScalingWithDifficulty(rawScore, configSO.level);
-            Debug.Log("Current Score: " + currentScore);
-
-            // Display score panel and update best score
-            //ScorePanel.SetActive(true);
-            scoreBoard.UpdatePlayerScoreGradually(currentScore, 5f);
-            scoreBoard.playerScore = currentScore;
-            CheckBestScore(currentScore);
-            chancesManager.lives--;
-
+            Debug.Log($"Calculated Current Score: {currentScore}");
+            StartCoroutine(ShowAndSaveScore());
         }
         else
         {
@@ -55,68 +59,90 @@ public class InGameManager : Singleton<InGameManager>
         }
     }
 
+    private IEnumerator ShowAndSaveScore()
+    {
+        // Display score and save the result
+        yield return StartCoroutine(scoreBoard.UpdateScoreCoroutine(currentScore, 5f));
+
+        // Update scoreboard and lives
+        scoreBoard.playerScore = currentScore;
+        Debug.Log("table chances " );
+        Debug.Log(configSO.chances - chancesManager.lives + 1 );
+        chancesManager.UpdateScore(configSO.chances - chancesManager.lives, currentScore);
+
+        // Check for new best score
+        CheckBestScore(currentScore);
+
+        // Decrement lives and reset score
+        chancesManager.lives--;
+        yield return StartCoroutine(scoreBoard.ResetWithBlinkingEffect());
+        ResetScore();
+
+        if (chancesManager.lives <= 0)
+        {
+            yield return WaitForScoreUpdateThenLoadScene();
+        }
+    }
+
+    private void ResetScore()
+    {
+        currentScore = 0;
+        scoreBoard.playerScore = 0;
+    }
+
     public int ConvertScrScore(string input)
     {
-        // Split the input by newline and search for a line containing "SCR|"
-        string[] lines = input.Split('\n');
-        foreach (string line in lines)
+        foreach (string line in input.Split('\n'))
         {
             if (line.Contains("SCR|"))
             {
                 string scoreString = line.Substring(line.IndexOf("SCR|") + 4);
-
                 if (int.TryParse(scoreString, out int score))
                 {
-                    Debug.Log("Parsed Score: " + score);
+                    Debug.Log($"Parsed Score: {score}");
                     return score;
                 }
-                else
-                {
-                    Debug.LogWarning("Invalid score format.");
-                }
+
+                Debug.LogWarning("Invalid score format encountered.");
             }
         }
 
-        return -1; // Indicates no valid score was found
+        return -1; // No valid score found
     }
 
-    int SimpleInverseScoreWithDifficulty(int rawScore, int difficulty, int maxRawScore = 1000000, int maxScore = 1000)
+    private int InverseLogScalingWithDifficulty(int rawScore, int difficulty, int minValue = 1, int maxValue = 1000000, int maxScore = 2000)
     {
-        // Clamp the raw score to avoid values beyond expected range
-        rawScore = Mathf.Clamp(rawScore, 0, maxRawScore);
-
-        // Calculate difficulty adjustment factor
-        float difficultyFactor = 1f + (difficulty - 1) * 0.2f;
-        int adjustedMaxScore = (int)(maxScore / difficultyFactor);
-
-        // Calculate and clamp inverse score
-        int calculatedScore = adjustedMaxScore - (int)((float)rawScore / maxRawScore * adjustedMaxScore);
-        return Mathf.Clamp(calculatedScore, 0, maxScore);
+        double logMax = Math.Log(maxValue - minValue + 1);
+        double difficultyFactor = Math.Pow(sensivity, difficulty - 1);
+        int score = (int)(maxScore - Math.Log(rawScore - minValue + 1) * maxScore / (logMax * difficultyFactor));
+        return Mathf.Clamp(score, 0, maxScore);
     }
-
-    int InverseLogScalingWithDifficulty(int x, int difficulty, int min_value = 1, int max_value = 1000000, int max_score = 1000)
-{
-    double logMax = Math.Log(max_value - min_value + 1);
-    double difficultyFactor = Math.Pow(1.5, difficulty - 1);
-    int score = (int)(max_score - Math.Log(x - min_value + 1) * max_score / (logMax * difficultyFactor));
-    return Math.Max(0, Math.Min(max_score, score));
-}
 
     private void CheckBestScore(int currentScore)
     {
-        // Update and display best score if the current score exceeds the best
         if (currentScore > configSO.bestScore)
         {
             configSO.bestScore = currentScore;
             scoreBoard.bestScore = currentScore;
             Debug.Log("New best score achieved!");
-            // Additional logic to display a "New Best Score" panel can be added here
         }
+    }
+
+    private IEnumerator WaitForScoreUpdateThenLoadScene()
+    {
+        // Delay to allow score animations to finish
+        yield return new WaitForSeconds(5f);
+        LoadStartScene();
+    }
+
+    private void LoadStartScene()
+    {
+        Debug.Log("No chances left, loading START scene...");
+        SceneManager.LoadScene("START");
     }
 
     private void OnDestroy()
     {
-        // Unsubscribe from the event to prevent memory leaks
         if (DataProcessor.Instance != null)
         {
             DataProcessor.Instance.delegateInfo -= Round;

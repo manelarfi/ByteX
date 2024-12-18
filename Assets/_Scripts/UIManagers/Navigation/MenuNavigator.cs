@@ -51,7 +51,7 @@ public class MenuNavigator : MonoBehaviour
         // Submit action on selected button
         if (Input.GetButtonDown("Submit"))
         {
-            // audioManagerr.Instance.PlaySFX(0);
+            AudioManager.Instance.PlaySFX(0);
             Debug.Log("submit");
             menuButtons[selectedIndex].onClick.Invoke(); // Trigger button click event
         }

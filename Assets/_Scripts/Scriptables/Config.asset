@@ -27,3 +27,4 @@ MonoBehaviour:
   level: 4
   chances: 3
   bestScore: 944
+  coinCounter: 1

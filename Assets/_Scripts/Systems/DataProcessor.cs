@@ -137,7 +137,7 @@ public class DataProcessor : StaticInstance<DataProcessor>
             if (responseReceived)
             {
                 canStart = true;
-                // StartCoroutine(waitBeforeStart());
+                StartCoroutine(waitBeforeStart());
                 _connectionPanelController.SetConnectedActive();
             }
             else
